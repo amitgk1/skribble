@@ -1,33 +1,84 @@
+import queue
 from threading import Thread
 import socket
+import time
 from typing import Callable
 
 from skribbl.actions.action import Action
+from skribbl.actions.protocol import ActionProtocol
 from skribbl.config import SERVER_ADDRESS, SERVER_PORT
 
+BATCH_SIZE = 50
+SEND_INTERVAL = 0.05 # Send batch every 50ms
 
 class ClientSocket:
     def __init__(self, on_action: Callable[[Action], None]):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((SERVER_ADDRESS, SERVER_PORT))
-        self.on_action = on_action
-        self.thread = Thread(target=self.thread_main)
-        self.thread.start()
+
+        self.batch_thread = BatchThread(self.socket)
+        self.recv_thread = ReceiverThread(self.socket, on_action)
 
     def send_action_to_server(self, action: Action):
-        self.socket.sendall(action.serialize())
+        self.batch_thread.add_to_queue(action)
 
     def close_client(self):
+        self.batch_thread.stop()
         self.socket.shutdown(socket.SHUT_RDWR)
 
-    def thread_main(self):
+class BatchThread:
+    def __init__(self, socket: socket.socket):
+        self.socket = socket
+        self.queue = queue.Queue()
+        self.batch_thread_running = True
+        # must be last
+        self.t = Thread(target=self.batch_thread)
+        self.t.start()
+
+    def add_to_queue(self, action: Action):
+        self.queue.put(action)
+
+    def stop(self):
+        self.batch_thread_running = False
+
+    def batch_thread(self):
+        data_batch = []
+        last_send_time = time.time()
+
+        while self.batch_thread_running:
+            try:
+                data_item = self.queue.get(timeout=SEND_INTERVAL)
+                data_batch.append(data_item)
+
+                if len(data_batch) >= BATCH_SIZE or time.time() - last_send_time >= SEND_INTERVAL:
+                    ActionProtocol.send_batch(self.socket, data_batch)
+                    data_batch = []
+                    last_send_time = time.time()
+            except queue.Empty:
+                # Timeout occurred: send any remaining data
+                if data_batch:
+                    ActionProtocol.send_batch(self.socket, data_batch)
+                    data_batch = []
+                    last_send_time = time.time()
+
+class ReceiverThread:
+    def __init__(self, socket: socket.socket, on_action: Callable[[Action], None]):
+        self.on_action = on_action
+        self.socket = socket
+        
+        # must be last
+        self.t = Thread(target=self.recv_thread_main)
+        self.t.start()
+    
+    def recv_thread_main(self):
         print("inside client thread", self)
         while True:
-            msg = self.socket.recv(1024)
-            if msg:
-                action = Action.deserialize(msg)
-                print(action)
-                self.on_action(action)
+            actions = ActionProtocol.recv_batch(self.socket)
+            if actions:
+                for action in actions:
+                    # action = Action.deserialize(msg)
+                    print(action)
+                    self.on_action(action)
             else:
                 print("ending thread")
                 break
