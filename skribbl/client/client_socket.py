@@ -9,7 +9,8 @@ from skribbl.actions.protocol import ActionProtocol
 from skribbl.config import SERVER_ADDRESS, SERVER_PORT
 
 BATCH_SIZE = 50
-SEND_INTERVAL = 0.05 # Send batch every 50ms
+SEND_INTERVAL = 0.05  # Send batch every 50ms
+
 
 class ClientSocket:
     def __init__(self, on_action: Callable[[Action], None]):
@@ -25,6 +26,7 @@ class ClientSocket:
     def close_client(self):
         self.batch_thread.stop()
         self.socket.shutdown(socket.SHUT_RDWR)
+
 
 class BatchThread:
     def __init__(self, socket: socket.socket):
@@ -50,7 +52,10 @@ class BatchThread:
                 data_item = self.queue.get(timeout=SEND_INTERVAL)
                 data_batch.append(data_item)
 
-                if len(data_batch) >= BATCH_SIZE or time.time() - last_send_time >= SEND_INTERVAL:
+                if (
+                    len(data_batch) >= BATCH_SIZE
+                    or time.time() - last_send_time >= SEND_INTERVAL
+                ):
                     ActionProtocol.send_batch(self.socket, data_batch)
                     data_batch = []
                     last_send_time = time.time()
@@ -60,24 +65,25 @@ class BatchThread:
                     ActionProtocol.send_batch(self.socket, data_batch)
                     data_batch = []
                     last_send_time = time.time()
+            except socket.error as e:
+                print("Failed to send batch to server", e)
+
 
 class ReceiverThread:
     def __init__(self, socket: socket.socket, on_action: Callable[[Action], None]):
         self.on_action = on_action
         self.socket = socket
-        
+
         # must be last
         self.t = Thread(target=self.recv_thread_main)
         self.t.start()
-    
+
     def recv_thread_main(self):
         print("inside client thread", self)
         while True:
             actions = ActionProtocol.recv_batch(self.socket)
             if actions:
                 for action in actions:
-                    # action = Action.deserialize(msg)
-                    print(action)
                     self.on_action(action)
             else:
                 print("ending thread")
