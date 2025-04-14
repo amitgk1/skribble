@@ -190,13 +190,14 @@ class Game:
     def add_player_message(self, player_name, message):
         self.chat_messages.append((player_name, message))
 
-    def handle_events(self, events):
+    def handle_events(self, events: list[pygame.event.Event]):
         for event in events:
             if event.type == pygame.QUIT:
                 return False
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button
+                    print(event)
                     mouse_pos = pygame.mouse.get_pos()
 
                     # Check if clicking in the drawing area

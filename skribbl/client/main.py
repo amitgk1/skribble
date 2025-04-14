@@ -1,24 +1,24 @@
 import pygame
 
+from skribbl.client.game import Game
+
 # Initialize pygame
 pygame.init()
+
+clock = pygame.time.Clock()
 
 
 # Main game loop
 def main():
     game = Game()
-    running = True
 
-    while running:
+    while game.state.running:
         # Handle events
         events = pygame.event.get()
-        running = game.handle_events(events)
-
-        # Update game state
-        game.update()
+        game.handle_events(events)
 
         # Draw the game
-        game.draw(screen)
+        game.draw()
 
         # Update the display
         pygame.display.flip()

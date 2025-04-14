@@ -1,9 +1,9 @@
-import pygame
-import pygame.freetype
 import random
-import math
 import time
 from collections import deque
+
+import pygame
+import pygame.freetype
 
 # Initialize pygame
 pygame.init()
@@ -199,7 +199,7 @@ class Game:
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button
-                    mouse_pos = pygame.mouse.get_pos()
+                    mouse_pos = event.pos
 
                     # Check if clicking in the drawing area
                     if (
