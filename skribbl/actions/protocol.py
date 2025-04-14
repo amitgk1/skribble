@@ -2,6 +2,7 @@ import pickle
 import socket
 from skribbl.actions.action import Action
 
+HEADER_SIZE = 4
 
 class ActionProtocol:
     @staticmethod
@@ -11,21 +12,17 @@ class ActionProtocol:
             
         serialized = pickle.dumps(batch)
         
-        # First send the length of the pickled data as a fixed-length (4-byte) integer
+        # First send the length of the pickled data as a fixed-length integer
         message_length = len(serialized)
-        size = message_length.to_bytes(4, byteorder='big')
+        size = message_length.to_bytes(HEADER_SIZE, byteorder='big')
 
-        # Then send the actual data
-        try:
-            sock.sendall(size + serialized)
-        except sock.error as e:
-            print(f"Failed to send batch: {e}")
+        sock.sendall(size + serialized)
 
     @staticmethod
     def recv_batch_raw(sock: socket.socket):
-        # First read the 4-byte message length header
-        header = sock.recv(4)
-        if not header or len(header) < 4:
+        # First read the message length header
+        header = sock.recv(HEADER_SIZE)
+        if not header or len(header) < HEADER_SIZE:
             return None
         
         # Unpack the message length
