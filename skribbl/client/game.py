@@ -17,12 +17,12 @@ class Game:
         self.state = GameState()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.drawing_surface = DrawingSurface(
-            DRAWING_AREA_WIDTH, DRAWING_AREA_HEIGHT, DRAWING_AREA_X, DRAWING_AREA_Y
+            DRAWING_AREA_X, DRAWING_AREA_Y, DRAWING_AREA_WIDTH, DRAWING_AREA_HEIGHT
         )
-        pygame.event.poll()
         pygame.event.set_allowed(
             [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]
         )
+        pygame.event.poll()
         self.client = ClientSocket(self.update)
 
     def handle_events(self, events: list[pygame.event.Event]):
@@ -38,12 +38,10 @@ class Game:
                 pygame.MOUSEMOTION,
             ):
                 # Find the object under the mouse
-                mouse_pos = event.pos
-                if self.drawing_surface.is_mouse_over(mouse_pos):
-                    action = self.drawing_surface.handle_event(event)
-                    if action:
-                        self.update(action)
-                        self.client.send_action_to_server(action)
+                action = self.drawing_surface.handle_event(event)
+                if action:
+                    self.update(action)
+                    self.client.send_action_to_server(action)
 
     def update(self, action: Action):
         if isinstance(action, DrawAction):

@@ -5,7 +5,7 @@ import pygame
 
 
 class GameObject:
-    def __init__(self, x, y, width, height):
+    def __init__(self, x: float, y: float, width: float, height: float):
         self.x = x
         self.y = y
         self.width = width
@@ -15,7 +15,7 @@ class GameObject:
         # Default implementation: do nothing
         pass
 
-    def draw(self, surface, offset=(0, 0)):
+    def draw(self, surface: pygame.Surface):
         # Default implementation: draw a simple rectangle
         pass
 
