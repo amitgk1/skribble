@@ -1,9 +1,9 @@
 import socket
 import threading
 
-from skribbl.actions.protocol import ActionProtocol
-from skribbl.config import SERVER_PORT
-from skribbl.server.thread_safe_set import ThreadSafeSet
+from server.thread_safe_set import ThreadSafeSet
+from shared.config import SERVER_PORT
+from shared.protocol import ActionProtocol
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = "0.0.0.0"

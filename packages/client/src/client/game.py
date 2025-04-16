@@ -1,10 +1,9 @@
 import pygame
-
-from skribbl.actions.action import Action
-from skribbl.actions.draw_action import DrawAction
-from skribbl.client.client_socket import ClientSocket
-from skribbl.client.drawing_surface import DrawingSurface
-from skribbl.client.game_state import GameState
+from client.client_socket import ClientSocket
+from client.drawing_surface import DrawingSurface
+from client.game_state import GameState
+from shared.action import Action
+from shared.draw_action import DrawAction
 
 WIDTH, HEIGHT = 1000, 800
 DRAWING_AREA_WIDTH, DRAWING_AREA_HEIGHT = 700, 500

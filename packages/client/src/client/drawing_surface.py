@@ -1,8 +1,8 @@
 from typing import override
-import pygame
 
-from skribbl.actions.draw_action import DrawAction
-from skribbl.client.game_object import GameObject
+import pygame
+from client.game_object import GameObject
+from shared.draw_action import DrawAction
 
 
 class DrawingSurface(GameObject):
@@ -48,4 +48,5 @@ class DrawingSurface(GameObject):
         surface.blit(self.surface, (self.x, self.y))
 
     def _normalizeCoordinates(self, pos):
+        return (pos[0] - self.x, pos[1] - self.y)
         return (pos[0] - self.x, pos[1] - self.y)

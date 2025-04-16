@@ -1,6 +1,5 @@
 import pygame
-
-from skribbl.client.game import Game
+from client.game import Game
 
 # Initialize pygame
 pygame.init()
@@ -29,4 +28,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    pygame.quit()
     pygame.quit()

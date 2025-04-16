@@ -1,20 +1,22 @@
 import pickle
 import socket
-from skribbl.actions.action import Action
+
+from shared.action import Action
 
 HEADER_SIZE = 4
+
 
 class ActionProtocol:
     @staticmethod
     def send_batch(sock: socket.socket, batch: list[Action]):
         if not batch:
             return
-            
+
         serialized = pickle.dumps(batch)
-        
+
         # First send the length of the pickled data as a fixed-length integer
         message_length = len(serialized)
-        size = message_length.to_bytes(HEADER_SIZE, byteorder='big')
+        size = message_length.to_bytes(HEADER_SIZE, byteorder="big")
 
         sock.sendall(size + serialized)
 
@@ -24,10 +26,10 @@ class ActionProtocol:
         header = sock.recv(HEADER_SIZE)
         if not header or len(header) < HEADER_SIZE:
             return None
-        
+
         # Unpack the message length
-        message_length = int.from_bytes(header, byteorder='big')
-        
+        message_length = int.from_bytes(header, byteorder="big")
+
         # Read the actual message data
         data = b""
         while len(data) < message_length:
@@ -36,16 +38,16 @@ class ActionProtocol:
                 raise RuntimeError("Socket connection broken")
             data += chunk
 
-        return (header,data)
+        return (header, data)
 
     @staticmethod
     def recv_batch(sock: socket.socket) -> list[Action]:
         size_plus_data = ActionProtocol.recv_batch_raw(sock)
-        
+
         try:
             if size_plus_data:
                 size, data = size_plus_data
-                
+
                 if data:
                     # Unpickle the batch
                     actions = pickle.loads(data)
@@ -53,4 +55,4 @@ class ActionProtocol:
                         actions = [actions]
                     return actions
         except pickle.UnpicklingError as e:
-                print(f"Error unpickling data: {e}")
+            print(f"Error unpickling data: {e}")

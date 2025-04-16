@@ -1,6 +1,5 @@
 import pygame
-
-from skribbl.actions.action import Action
+from shared.action import Action
 
 
 class DrawAction(Action):
@@ -9,5 +8,7 @@ class DrawAction(Action):
     ):
         self.start_pos = start_pos
         self.end_pos = end_pos
+        self.color = color
+        self.brush_size = brush_size
         self.color = color
         self.brush_size = brush_size

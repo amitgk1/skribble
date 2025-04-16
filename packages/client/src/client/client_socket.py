@@ -1,12 +1,12 @@
 import queue
-from threading import Thread
 import socket
 import time
+from threading import Thread
 from typing import Callable
 
-from skribbl.actions.action import Action
-from skribbl.actions.protocol import ActionProtocol
-from skribbl.config import SERVER_ADDRESS, SERVER_PORT
+from shared.action import Action
+from shared.config import SERVER_ADDRESS, SERVER_PORT
+from shared.protocol import ActionProtocol
 
 BATCH_SIZE = 50
 SEND_INTERVAL = 0.05  # Send batch every 50ms
