@@ -1,7 +1,8 @@
+import logging
 import pickle
 import socket
 
-from shared.action import Action
+from shared.actions import Action
 
 HEADER_SIZE = 4
 
@@ -54,5 +55,5 @@ class ActionProtocol:
                     if not isinstance(actions, list):
                         actions = [actions]
                     return actions
-        except pickle.UnpicklingError as e:
-            print(f"Error unpickling data: {e}")
+        except pickle.UnpicklingError:
+            logging.exception("Error unpickling data")

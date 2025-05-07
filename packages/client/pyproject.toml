@@ -3,9 +3,14 @@ name = "client"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-authors = [{ name = "Amit Genish", email = "amitgk159753@gmail.com" }]
+authors = [{ name = "Noam Genish" }]
 requires-python = ">=3.12"
-dependencies = ["pygame>=2.6.1", "shared"]
+dependencies = [
+    "pygame>=2.6.1",
+    "pygame-emojis>=0.1.1",
+    "pygame-menu>=4.5.2",
+    "shared",
+]
 
 [project.gui-scripts]
 client = "client:main"

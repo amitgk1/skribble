@@ -5,7 +5,7 @@ import pygame
 
 
 class GameObject:
-    def __init__(self, x: float, y: float, width: float, height: float):
+    def __init__(self, x: int, y: int, width: float, height: float):
         self.x = x
         self.y = y
         self.width = width

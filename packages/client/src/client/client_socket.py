@@ -1,10 +1,11 @@
+import logging
 import queue
 import socket
 import time
 from threading import Thread
 from typing import Callable
 
-from shared.action import Action
+from shared.actions import Action
 from shared.config import SERVER_ADDRESS, SERVER_PORT
 from shared.protocol import ActionProtocol
 
@@ -65,8 +66,8 @@ class BatchThread:
                     ActionProtocol.send_batch(self.socket, data_batch)
                     data_batch = []
                     last_send_time = time.time()
-            except socket.error as e:
-                print("Failed to send batch to server", e)
+            except socket.error:
+                logging.exception("Failed to send batch to server")
 
 
 class ReceiverThread:
@@ -79,12 +80,12 @@ class ReceiverThread:
         self.t.start()
 
     def recv_thread_main(self):
-        print("inside client thread", self)
+        logging.debug("client thread started")
         while True:
             actions = ActionProtocol.recv_batch(self.socket)
             if actions:
                 for action in actions:
                     self.on_action(action)
             else:
-                print("ending thread")
+                logging.debug("ending client receiver thread")
                 break

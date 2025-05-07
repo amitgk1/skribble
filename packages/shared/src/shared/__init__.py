@@ -1,2 +1,5 @@
-def hello() -> str:
-    return "Hello from shared!"
+import logging
+
+import coloredlogs
+
+coloredlogs.install(level=logging.DEBUG)
