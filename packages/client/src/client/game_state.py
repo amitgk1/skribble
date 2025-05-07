@@ -10,3 +10,7 @@ class GameState:
         self.pending_draw_lines = queue.Queue()
         self.players_info: list[Player] = None
         self.my_player_id: UUID
+        self.current_word: str
+
+    def me(self):
+        return next(p for p in self.players_info if p.id == self.my_player_id)
