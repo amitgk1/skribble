@@ -16,7 +16,12 @@ class PlayersList:
     def draw(self, gameState: GameState, surface: pygame.Surface):
         """Draw the connected players list"""
 
-        pygame.draw.rect(surface, WHITE, self.player_list_rect, border_radius=10)
+        pygame.draw.rect(
+            surface,
+            "gray99",
+            self.player_list_rect,
+            border_radius=10,
+        )
 
         # Draw header
         header_surf = FONT_MD.render("Players", True, BLACK)
@@ -25,37 +30,9 @@ class PlayersList:
         )
         surface.blit(header_surf, header_rect)
 
-        # # Draw horizontal line below header
-        # pygame.draw.line(
-        #     surface,
-        #     DARK_GRAY,
-        #     (self.player_list_rect.left + 20, self.player_list_rect.top + 60),
-        #     (self.player_list_rect.right - 20, self.player_list_rect.top + 60),
-        #     2,
-        # )
-
         # Draw players
         if gameState.players_info:
             for i, player in enumerate(gameState.players_info):
-                # y_pos = self.player_list_rect.top + 100 + i * 50
-
-                # name_color = DARK_BLUE if player.is_owner else BLACK
-                # name_fallback = player.name or player.id.__str__()[:5]
-                # name_text = (
-                #     name_fallback
-                #     if player.id != gameState.my_player_id
-                #     else f"{name_fallback} (you)"
-                # )
-                # name_surf = FONT_SM.render(name_text, True, name_color)
-                # surface.blit(name_surf, (self.player_list_rect.left + 20, y_pos))
-
-                # # Player score
-                # score_surf = FONT_SM.render(f"{player.score} pts", True, DARK_GRAY)
-                # score_rect = score_surf.get_rect(
-                #     right=self.player_list_rect.right - 20, top=y_pos
-                # )
-                # surface.blit(score_surf, score_rect)
-
                 player_rect = pygame.Rect(
                     self.player_list_rect.x + 10,
                     self.player_list_rect.y + 40 + i * 40,
@@ -94,7 +71,7 @@ class PlayersList:
                 )
 
                 # Player score
-                score_text = FONT_MD.render(str(player.score), True, DARK_BLUE)
+                score_text = FONT_MD.render(f"{player.score} pts", True, DARK_BLUE)
                 surface.blit(
                     score_text,
                     (
