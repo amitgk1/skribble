@@ -3,7 +3,7 @@ from typing import Callable, Tuple, override
 import pygame
 from shared.actions.draw_action import DrawAction
 
-from client.colors import BLACK
+from client.colors import BLACK, WHITE
 from client.game_object import GameObject
 
 
@@ -12,7 +12,7 @@ class Canvas(GameObject):
         super().__init__(x, y, width, height)
         self.on_draw = on_draw
         self.surface = pygame.Surface((width, height))
-        self.surface.fill(color=(255, 255, 255))
+        self.surface.fill(WHITE)
         self.last_pos: pygame.Vector2 = None
         self.is_drawing = False
 
