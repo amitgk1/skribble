@@ -15,7 +15,7 @@ from client.window import Window
 if TYPE_CHECKING:
     from client import UserInterface
 
-from client.canvas import Canvas
+from client.items.canvas import Canvas
 
 DRAWING_AREA_WIDTH, DRAWING_AREA_HEIGHT = 700, 500
 DRAWING_AREA_X = 20
