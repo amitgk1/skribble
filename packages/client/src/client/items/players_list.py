@@ -32,7 +32,9 @@ class PlayersList:
 
         # Draw players
         if gameState.players_info:
-            for i, player in enumerate(gameState.players_info):
+            for i, player in enumerate(
+                sorted(gameState.players_info, key=lambda p: p.score)
+            ):
                 player_rect = pygame.Rect(
                     self.player_list_rect.x + 10,
                     self.player_list_rect.y + 40 + i * 40,
