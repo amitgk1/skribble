@@ -7,6 +7,7 @@ from shared.actions.draw_action import DrawAction
 from client.colors import DARK_GRAY, WHITE
 from client.fonts import FONT_TITLE
 from client.game_state import GameState
+from client.items.chat import Chat
 from client.items.players_list import PlayersList
 from client.items.title import Title
 from client.window import Window
@@ -77,6 +78,14 @@ class Game(Window):
                 50,
             )
         )
+        self.chat = Chat(
+            pygame.Rect(
+                self.canvas.x + self.canvas.width + 10,
+                HEADER_HEIGHT + 20,
+                300,
+                DRAWING_AREA_HEIGHT,
+            )
+        )
 
     def _on_draw(self, draw_action: DrawAction):
         self.on_action(draw_action)
@@ -85,6 +94,7 @@ class Game(Window):
     @override
     def handle_event(self, event):
         self.canvas.handle_event(event)
+        self.chat.handle_event(event)
 
     @override
     def on_action(self, action: Action):
@@ -108,6 +118,7 @@ class Game(Window):
         self.canvas.draw(surface)
         self.playersList.draw(self.ui.state, surface)
         self.word_display.draw(self.ui.state, surface)
+        self.chat.draw(surface)
 
     def _draw_smooth_line(self, surf: pygame.surface, draw_action: DrawAction):
         distance = int(draw_action.start.distance_to(draw_action.end))

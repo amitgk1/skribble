@@ -15,6 +15,7 @@ class TextInput:
         width: int,
         height: int,
         on_input: Callable[[str], None],
+        on_enter: Callable[[str], None] = lambda x: None,
         max_length: int = 20,
         placeholder: str = "Enter your name...",
     ):
@@ -26,6 +27,7 @@ class TextInput:
         self.cursor_timer = 0
         self.max_length = max_length
         self.on_input = on_input
+        self.on_enter = on_enter
 
     def draw(self, surface: pygame.Surface):
         # Draw the input box with a slight shadow effect
@@ -82,8 +84,12 @@ class TextInput:
                 self.on_input(self.text)
             elif event.key == pygame.K_RETURN:
                 self.active = False
+                self.on_enter(self.text)
             elif len(self.text) < self.max_length:
                 # Only allow valid characters (alphanumeric and common symbols)
                 if event.unicode.isprintable():
                     self.text += event.unicode
                     self.on_input(self.text)
+
+    def clear(self):
+        self.text = ""
