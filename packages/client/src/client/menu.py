@@ -32,12 +32,13 @@ class Menu(Window):
             self.ui.screen.get_height() - 120,
             start_button_width,
             60,
-            "Start Game!",
             GREEN,
             (120, 255, 120),
+            "Start Game!",
             BLACK,
             disabled=False,
             on_click=self.ui.show_game,
+            border_radius=10,
         )
 
         # Create additional buttons
@@ -55,11 +56,12 @@ class Menu(Window):
             self.ui.screen.get_height() - 200,
             button_width,
             button_height,
-            "How to Play",
             YELLOW,
             ORANGE,
+            "How to Play",
             BLACK,
             on_click=self._toggle_help,
+            border_radius=10,
         )
 
         self.exit_button = Button(
@@ -67,11 +69,12 @@ class Menu(Window):
             self.ui.screen.get_height() - 200,
             button_width,
             button_height,
-            "Exit",
             PINK,
             RED,
+            "Exit",
             BLACK,
             on_click=self.ui.quit_game,
+            border_radius=10,
         )
 
         # Create text input for player name

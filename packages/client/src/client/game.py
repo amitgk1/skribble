@@ -10,6 +10,7 @@ from client.game_state import GameState
 from client.items.chat import Chat
 from client.items.players_list import PlayersList
 from client.items.title import Title
+from client.items.toolbar import Toolbar
 from client.window import Window
 
 if TYPE_CHECKING:
@@ -69,6 +70,7 @@ class Game(Window):
             DRAWING_AREA_WIDTH,
             DRAWING_AREA_HEIGHT,
             on_draw=self._on_draw,
+            state=self.ui.state,
         )
         self.word_display = WordDisplay(
             pygame.Rect(
@@ -86,6 +88,15 @@ class Game(Window):
                 DRAWING_AREA_HEIGHT,
             )
         )
+        self.toolbar = Toolbar(
+            self.ui.state,
+            pygame.Rect(
+                self.canvas.x,
+                self.canvas.y + self.canvas.height + 5,
+                DRAWING_AREA_WIDTH,
+                50,
+            ),
+        )
 
     def _on_draw(self, draw_action: DrawAction):
         self.on_action(draw_action)
@@ -95,6 +106,7 @@ class Game(Window):
     def handle_event(self, event):
         self.canvas.handle_event(event)
         self.chat.handle_event(event)
+        self.toolbar.handle_event(event)
 
     @override
     def on_action(self, action: Action):
@@ -119,6 +131,7 @@ class Game(Window):
         self.playersList.draw(self.ui.state, surface)
         self.word_display.draw(self.ui.state, surface)
         self.chat.draw(surface)
+        self.toolbar.draw(surface)
 
     def _draw_smooth_line(self, surf: pygame.surface, draw_action: DrawAction):
         distance = int(draw_action.start.distance_to(draw_action.end))

@@ -1,5 +1,4 @@
 # game_object.py - Base class for all game objects
-from typing import Tuple
 
 import pygame
 
@@ -17,7 +16,4 @@ class GameObject:
 
     def draw(self, surface: pygame.Surface):
         # Default implementation: draw a simple rectangle
-        pass
-
-    def is_mouse_over(self, mouse_pos: Tuple[float, float]) -> bool:
         pass

@@ -9,5 +9,5 @@ from shared.actions import Action
 class DrawAction(Action):
     start: pygame.Vector2
     end: pygame.Vector2
-    color: pygame.color
+    color: pygame.color.Color
     brush_size: int
