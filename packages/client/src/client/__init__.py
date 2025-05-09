@@ -20,9 +20,9 @@ class UserInterface:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Skribbl.io Clone by Noam Genish")
         self.clock = pygame.time.Clock()
+        self.state = GameState()
         self.windows: tuple[Window] = [Menu(self), Game(self)]
         self.active_window_idx = 0
-        self.state = GameState()
         self.client = ClientSocket(on_action=self.on_action)
 
     @property
