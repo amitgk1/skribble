@@ -96,17 +96,19 @@ class Game(Window):
                 DRAWING_AREA_WIDTH,
                 50,
             ),
+            self.canvas.clear_canvas,
         )
-
-    def _on_draw(self, draw_action: DrawAction):
-        self.on_action(draw_action)
-        self.ui.client.send_action_to_server(draw_action)
 
     @override
     def handle_event(self, event):
         self.canvas.handle_event(event)
         self.chat.handle_event(event)
         self.toolbar.handle_event(event)
+
+    @override
+    def update(self):
+        self.canvas.update()
+        self.toolbar.update()
 
     @override
     def on_action(self, action: Action):
@@ -132,6 +134,10 @@ class Game(Window):
         self.word_display.draw(self.ui.state, surface)
         self.chat.draw(surface)
         self.toolbar.draw(surface)
+
+    def _on_draw(self, draw_action: DrawAction):
+        self.on_action(draw_action)
+        self.ui.client.send_action_to_server(draw_action)
 
     def _draw_smooth_line(self, surf: pygame.surface, draw_action: DrawAction):
         distance = int(draw_action.start.distance_to(draw_action.end))
