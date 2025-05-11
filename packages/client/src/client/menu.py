@@ -127,10 +127,6 @@ class Menu(Window):
         for item in self.items:
             item.handle_event(event)
 
-        # TODO: # When player name changes, check if they are the owner
-        # if event.type == pygame.KEYUP and self.name_input.active:
-        #     self.update_player_info()
-
     @override
     def update(self):
         """Update all animated elements"""
