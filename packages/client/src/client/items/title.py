@@ -1,5 +1,6 @@
 import pygame
-from client.colors import (
+from client.fonts import FONT_TITLE
+from shared.colors import (
     DARK_GRAY,
     GREEN,
     LIGHT_BLUE,
@@ -9,7 +10,6 @@ from client.colors import (
     RED,
     YELLOW,
 )
-from client.fonts import FONT_TITLE
 
 colors = [YELLOW, ORANGE, PINK, PURPLE, GREEN, LIGHT_BLUE, RED]
 

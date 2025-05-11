@@ -21,8 +21,11 @@ class ClientSocket:
         self.batch_thread = BatchThread(self.socket)
         self.recv_thread = ReceiverThread(self.socket, on_action)
 
-    def send_action_to_server(self, action: Action):
-        self.batch_thread.add_to_queue(action)
+    def send_action_to_server(self, action: Action, immediate=False):
+        if immediate:
+            ActionProtocol.send_batch(self.socket, action)
+        else:
+            self.batch_thread.add_to_queue(action)
 
     def close_client(self):
         self.batch_thread.stop()

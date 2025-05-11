@@ -1,10 +1,9 @@
 import pygame
-from client.colors import BLACK, DARK_BLUE, DARK_GRAY, GOLD, LIGHT_GRAY, WHITE
 from client.fonts import FONT_MD, FONT_SM
 from client.game_state import GameState
 from pygame_emojis import load_emoji
+from shared.colors import BLACK, DARK_BLUE, DARK_GRAY, GOLD, LIGHT_GRAY, WHITE
 
-NAME_FALLBACK = "anonymous"
 DRAWING_EMOJI = load_emoji("✏️", FONT_MD.get_height())
 YOU_EMOJI = load_emoji("👤", FONT_MD.get_height())
 
@@ -55,15 +54,12 @@ class PlayersList:
 
                 pygame.draw.rect(surface, DARK_GRAY, player_rect, 1, 5)
 
-                name = player.name or NAME_FALLBACK
-                player_name = (
-                    name if player.id != gameState.my_player_id else f"{name} (you)"
-                )
-
                 text_start = player_rect.x + 10
 
                 # Player name
-                name_surf = FONT_SM.render(player_name, True, BLACK)
+                name_surf = FONT_SM.render(
+                    player.get_player_name(gameState.my_player_id), True, BLACK
+                )
                 surface.blit(
                     name_surf,
                     (

@@ -1,12 +1,18 @@
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING, Callable, override
 
 import pygame
 from shared.actions import Action
+from shared.actions.chat_message_action import ChatMessageAction
+from shared.actions.clear_canvas_action import ClearCanvasAction
 from shared.actions.draw_action import DrawAction
+from shared.actions.pick_word_action import PickWordAction
+from shared.actions.update_word_action import UpdateWordAction
+from shared.chat_message import ChatMessage
+from shared.colors import BLACK, DARK_GRAY, LIGHT_GRAY, WHITE
 
-from client.colors import DARK_GRAY, WHITE
-from client.fonts import FONT_TITLE
+from client.fonts import FONT_LG, FONT_MD, FONT_TITLE
 from client.game_state import GameState
+from client.items.button import Button
 from client.items.chat import Chat
 from client.items.players_list import PlayersList
 from client.items.title import Title
@@ -33,27 +39,92 @@ class WordDisplay:
     def draw(self, game_state: GameState, surface: pygame.Surface):
         pygame.draw.rect(surface, WHITE, self.rect, border_radius=10)
 
-        if game_state.me().is_player_turn:
-            # Show the full word if you're drawing
-            word_text = FONT_TITLE.render(game_state.current_word, True, "blue")
-        else:
-            # Show placeholders if you're guessing
-            word_text = FONT_TITLE.render("_ _ _ _ _ _ _", True, DARK_GRAY)
+        word_text = None
+        if (
+            not game_state.me().is_player_turn
+            and not game_state.current_word
+            and game_state.active_player()
+        ):
+            word_text = FONT_MD.render(
+                f"{game_state.active_player().get_player_name(game_state.my_player_id)} is picking a word",
+                True,
+                DARK_GRAY,
+            )
+        elif game_state.current_word:
+            word_text = FONT_TITLE.render(game_state.current_word, True, DARK_GRAY)
 
-        surface.blit(
-            word_text,
-            (
-                self.rect.x + (self.rect.width - word_text.get_width()) // 2,
-                self.rect.y + (self.rect.height - word_text.get_height()) // 2,
-            ),
+        if word_text:
+            surface.blit(
+                word_text,
+                (
+                    self.rect.x + (self.rect.width - word_text.get_width()) // 2,
+                    self.rect.y + (self.rect.height - word_text.get_height()) // 2,
+                ),
+            )
+
+
+class PickWordPopUp:
+    def __init__(
+        self,
+        rect_bound: pygame.Rect,
+        word_options: list[str],
+        on_pick_word: Callable[[str], None],
+    ):
+        self.rect_bound = rect_bound
+        self.on_pick_word = on_pick_word
+        self.buttons = self._generate_word_options_buttons(word_options)
+
+    def draw(self, surface: pygame.Surface):
+        overlay = pygame.Surface(
+            (self.rect_bound.width, self.rect_bound.height), pygame.SRCALPHA
         )
+        overlay.fill((0, 0, 0, 150))
+        surface.blit(overlay, self.rect_bound)
+
+        title_surf = FONT_LG.render("Choose a word to draw:", True, WHITE)
+        title_rect = title_surf.get_rect(
+            center=(
+                self.rect_bound.centerx,
+                self.rect_bound.top + 10 + title_surf.get_height() // 2,
+            )
+        )
+        surface.blit(title_surf, title_rect)
+
+        for btn in self.buttons:
+            btn.draw(surface)
+
+    def handle_event(self, event):
+        for btn in self.buttons:
+            btn.handle_event(event)
+
+    def _generate_word_options_buttons(self, word_options):
+        width = 100
+        spacing = 50
+        height = 50
+        y = self.rect_bound.centery - height // 2
+        start_x = self.rect_bound.centerx - spacing - width * 1.5
+        return [
+            Button(
+                x,
+                y,
+                width,
+                height,
+                WHITE,
+                LIGHT_GRAY,
+                word,
+                BLACK,
+                on_click=lambda word=word: self.on_pick_word(word),
+            )
+            for i, word in enumerate(word_options)
+            if (x := start_x + i * (width + spacing))
+        ]
 
 
 class Game(Window):
     def __init__(self, ui: "UserInterface"):
         self.ui = ui
 
-        # TODO: fix positioning
+        # TODO: fix positioning to allow window resizing
         self.playersList = PlayersList(
             pygame.Rect(
                 10,
@@ -84,9 +155,11 @@ class Game(Window):
             pygame.Rect(
                 self.canvas.x + self.canvas.width + 10,
                 HEADER_HEIGHT + 20,
-                300,
+                200,
                 DRAWING_AREA_HEIGHT,
-            )
+            ),
+            self.ui.state,
+            self._on_chat_enter,
         )
         self.toolbar = Toolbar(
             self.ui.state,
@@ -96,24 +169,42 @@ class Game(Window):
                 DRAWING_AREA_WIDTH,
                 50,
             ),
-            self.canvas.clear_canvas,
+            on_clear=self._on_clear,
         )
+        self.popup = None
 
     @override
     def handle_event(self, event):
-        self.canvas.handle_event(event)
         self.chat.handle_event(event)
-        self.toolbar.handle_event(event)
+        if self.ui.state.ready_to_draw():
+            self.canvas.handle_event(event)
+            self.toolbar.handle_event(event)
+        if self.popup:
+            self.popup.handle_event(event)
 
     @override
     def update(self):
-        self.canvas.update()
-        self.toolbar.update()
+        if self.ui.state.ready_to_draw():
+            self.canvas.update()
+            self.toolbar.update()
+        self.chat.update()
 
     @override
     def on_action(self, action: Action):
         if isinstance(action, DrawAction):
             self.ui.state.pending_draw_lines.put(action)
+        elif isinstance(action, ClearCanvasAction):
+            self.canvas.clear_canvas()
+        elif isinstance(action, PickWordAction):
+            self.popup = PickWordPopUp(
+                self.canvas.surface.get_rect(topleft=(self.canvas.x, self.canvas.y)),
+                action.options,
+                self._on_pick_word,
+            )
+        elif isinstance(action, UpdateWordAction):
+            self.ui.state.current_word = action.word
+        elif isinstance(action, ChatMessageAction):
+            self.ui.state.chat_messages.append(action.message)
 
     @override
     def draw(self, surface):
@@ -129,15 +220,32 @@ class Game(Window):
             draw_action: DrawAction = self.ui.state.pending_draw_lines.get()
             self._draw_smooth_line(self.canvas.surface, draw_action)
 
+        if self.ui.state.ready_to_draw():
+            self.toolbar.draw(surface)
         self.canvas.draw(surface)
         self.playersList.draw(self.ui.state, surface)
         self.word_display.draw(self.ui.state, surface)
         self.chat.draw(surface)
-        self.toolbar.draw(surface)
+
+        if self.popup:
+            self.popup.draw(surface)
 
     def _on_draw(self, draw_action: DrawAction):
         self.on_action(draw_action)
         self.ui.client.send_action_to_server(draw_action)
+
+    def _on_clear(self):
+        self.canvas.clear_canvas()
+        self.ui.client.send_action_to_server(ClearCanvasAction(), immediate=True)
+
+    def _on_pick_word(self, word: str):
+        self.ui.state.current_word = word
+        self.ui.client.send_action_to_server(UpdateWordAction(word), immediate=True)
+        self.popup = None
+
+    def _on_chat_enter(self, text: str):
+        message = ChatMessage(self.ui.state.me().name, text, BLACK)
+        self.ui.client.send_action_to_server(ChatMessageAction(message), immediate=True)
 
     def _draw_smooth_line(self, surf: pygame.surface, draw_action: DrawAction):
         distance = int(draw_action.start.distance_to(draw_action.end))

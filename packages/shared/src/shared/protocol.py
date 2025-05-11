@@ -9,7 +9,7 @@ HEADER_SIZE = 4
 
 class ActionProtocol:
     @staticmethod
-    def send_batch(sock: socket.socket, batch: list[Action]):
+    def send_batch(sock: socket.socket, batch: list[Action] | Action):
         if not batch:
             return
 

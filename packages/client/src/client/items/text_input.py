@@ -1,8 +1,8 @@
 from typing import Callable
 
 import pygame
-from client.colors import BLACK, DARK_GRAY, LIGHT_BLUE, WHITE
 from client.fonts import FONT_MD
+from shared.colors import BLACK, DARK_GRAY, LIGHT_BLUE, WHITE
 
 
 class TextInput:
@@ -84,7 +84,8 @@ class TextInput:
                 self.on_input(self.text)
             elif event.key == pygame.K_RETURN:
                 self.active = False
-                self.on_enter(self.text)
+                if self.text:
+                    self.on_enter(self.text)
             elif len(self.text) < self.max_length:
                 # Only allow valid characters (alphanumeric and common symbols)
                 if event.unicode.isprintable():

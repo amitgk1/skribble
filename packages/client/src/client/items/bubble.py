@@ -2,7 +2,7 @@ import math
 import random
 
 import pygame
-from client.colors import GREEN, LIGHT_BLUE, ORANGE, PINK, PURPLE, WHITE, YELLOW
+from shared.colors import GREEN, LIGHT_BLUE, ORANGE, PINK, PURPLE, WHITE, YELLOW
 
 
 class Bubble:

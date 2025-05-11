@@ -3,6 +3,7 @@ import logging
 import pygame
 from shared.actions import Action
 from shared.actions.player_list_action import PlayerListAction
+from shared.actions.start_game_action import StartGameAction
 
 from client.client_socket import ClientSocket
 from client.game import Game
@@ -33,6 +34,8 @@ class UserInterface:
         if isinstance(action, PlayerListAction):
             self.state.players_info = action.players_list
             self.state.my_player_id = action.you
+        elif isinstance(action, StartGameAction):
+            self.show_game()
         else:
             self.active_window.on_action(action)
 

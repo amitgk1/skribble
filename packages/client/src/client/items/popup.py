@@ -1,10 +1,19 @@
+from typing import Callable
+
 import pygame
-from client.colors import BLACK, DARK_GRAY, LIGHT_BLUE, WHITE
 from client.fonts import FONT_LG, FONT_MD
+from shared.colors import BLACK, DARK_GRAY, LIGHT_BLUE, WHITE
 
 
 class Popup:
-    def __init__(self, title: str, lines: list[str], rect_bound: pygame.Rect):
+    def __init__(
+        self,
+        title: str,
+        lines: list[str],
+        rect_bound: pygame.Rect,
+        closable: bool = True,
+        on_close: Callable[[], None] = None,
+    ):
         self.title = title
         self.lines = lines
         self.rect_bound = rect_bound
@@ -15,6 +24,8 @@ class Popup:
             popup_width,
             popup_height,
         )
+        self.closable = closable
+        self.on_close = on_close
         self.close_surf = FONT_MD.render("X", True, BLACK)
         self.close_rect = self.close_surf.get_rect(
             topright=(self.popup_rect.right - 20, self.popup_rect.top + 20)
@@ -63,7 +74,12 @@ class Popup:
             )
             surface.blit(line_surf, line_rect)
 
-        # Close button (X)
-        pygame.draw.circle(surface, LIGHT_BLUE, self.close_rect.center, 15)
-        pygame.draw.circle(surface, BLACK, self.close_rect.center, 15, 1)
-        surface.blit(self.close_surf, self.close_rect)
+        if self.closable:
+            pygame.draw.circle(surface, LIGHT_BLUE, self.close_rect.center, 15)
+            pygame.draw.circle(surface, BLACK, self.close_rect.center, 15, 1)
+            surface.blit(self.close_surf, self.close_rect)
+
+    def handle_event(self, event: pygame.event.Event):
+        if self.closable and event.type == pygame.MOUSEBUTTONDOWN:
+            if self.close_rect.collidepoint(event.pos):
+                self.on_close()

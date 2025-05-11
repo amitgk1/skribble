@@ -1,9 +1,9 @@
 from typing import Callable, Tuple, override
 
 import pygame
-from client.colors import BLACK, DARK_GRAY, WHITE
 from client.fonts import FONT_MD
 from client.game_object import GameObject
+from shared.colors import BLACK, DARK_GRAY, WHITE
 
 
 class BaseButton(GameObject):

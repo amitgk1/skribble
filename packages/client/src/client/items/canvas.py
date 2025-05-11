@@ -1,11 +1,12 @@
 from typing import Callable, Tuple, override
 
 import pygame
-from client.colors import BLACK, WHITE
+import pygame.gfxdraw
 from client.constants import LEFT_CLICK, MOUSE_BUTTONS_TUPLE
 from client.game_object import GameObject
 from client.game_state import GameState
 from shared.actions.draw_action import DrawAction
+from shared.colors import BLACK, WHITE
 
 
 class Canvas(GameObject):
@@ -25,8 +26,7 @@ class Canvas(GameObject):
         self.last_pos: pygame.Vector2 = None
         self.is_drawing = False
         self.state = state
-        self.cursor_surface = pygame.Surface((100, 100))
-        self.cursor_surface.set_colorkey(WHITE)
+        self.cursor_surface = pygame.Surface((100, 100), pygame.SRCALPHA)
         self.cursor_surf_center = (50, 50)
         self.cursor = pygame.cursors.Cursor(
             self.cursor_surf_center,
@@ -76,19 +76,18 @@ class Canvas(GameObject):
         )
 
     def update(self):
-        self.cursor_surface.fill(WHITE)
-        pygame.draw.circle(
+        self.cursor_surface.fill((*WHITE, 0))
+        pygame.gfxdraw.filled_circle(
             self.cursor_surface,
+            *self.cursor_surf_center,
+            self.state.brush_size,
             self._get_drawing_color(LEFT_CLICK),
-            self.cursor_surf_center,
-            self.state.brush_size,
         )
-        pygame.draw.circle(
+        pygame.gfxdraw.aacircle(
             self.cursor_surface,
-            BLACK,
-            self.cursor_surf_center,
+            *self.cursor_surf_center,
             self.state.brush_size,
-            pygame.math.clamp(self.state.brush_size // 2, 1, 2),
+            BLACK,
         )
 
     def _get_drawing_color(self, button: int):

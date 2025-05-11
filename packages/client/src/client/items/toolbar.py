@@ -1,7 +1,9 @@
 from typing import Callable
 
 import pygame
-from client.colors import (
+from client.game_state import GameState
+from client.items.button import BaseButton, Button
+from shared.colors import (
     BLACK,
     DARK_BLUE,
     DARK_GRAY,
@@ -17,8 +19,6 @@ from client.colors import (
     WHITE,
     YELLOW,
 )
-from client.game_state import GameState
-from client.items.button import BaseButton, Button
 
 COLORS = [
     WHITE,

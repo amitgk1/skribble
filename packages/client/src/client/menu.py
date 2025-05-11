@@ -1,10 +1,11 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import pygame
 from shared.actions.player_name_action import PlayerNameAction
+from shared.actions.start_game_action import StartGameAction
+from shared.colors import BLACK, DARK_BLUE, GREEN, ORANGE, PINK, RED, YELLOW
 from shared.utils import debounce
 
-from client.colors import BLACK, DARK_BLUE, GREEN, ORANGE, PINK, RED, YELLOW
 from client.fonts import FONT_LG, FONT_MD
 from client.items.bubble import Bubble
 from client.items.button import Button
@@ -36,8 +37,8 @@ class Menu(Window):
             (120, 255, 120),
             "Start Game!",
             BLACK,
-            disabled=False,
-            on_click=self.ui.show_game,
+            disabled=True,
+            on_click=self._on_start,
             border_radius=10,
         )
 
@@ -111,18 +112,17 @@ class Menu(Window):
             self.exit_button,
         ]
 
+    @override
     def handle_event(self, event):
         """Handle user input events"""
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             # Check if clicking outside popups to close them
-            if self.popup:
-                # Check if clicked outside popup or on close button
-                if not self.popup.popup_rect.collidepoint(event.pos):
-                    self.popup = None
-                else:
-                    if self.popup.close_rect.collidepoint(event.pos):
-                        self.popup = None
+            if self.popup and not self.popup.popup_rect.collidepoint(event.pos):
+                self.popup = None
+
+        if self.popup:
+            self.popup.handle_event(event)
 
         for item in self.items:
             item.handle_event(event)
@@ -131,6 +131,7 @@ class Menu(Window):
         # if event.type == pygame.KEYUP and self.name_input.active:
         #     self.update_player_info()
 
+    @override
     def update(self):
         """Update all animated elements"""
         # Update decorative bubbles
@@ -142,27 +143,11 @@ class Menu(Window):
         if abs(self.logo_y_offset) > 10:
             self.logo_direction *= -1
 
-        # # Update player list periodically (in real app, use websockets or polling)
-        # # This is just for demo purposes
-        # if pygame.time.get_ticks() % 5000 < 10:  # Every ~5 seconds
-        #     self.update_player_info()
+        self.start_button.disabled = (
+            len(self.ui.state.players_info) < 2 or not self.ui.state.me().is_owner
+        )
 
-    def _toggle_help(self):
-        if self.popup:
-            self.popup = None
-        else:
-            self.popup = Popup(
-                "How to Play",
-                [
-                    "1. One player draws a word",
-                    "2. Others guess the word",
-                    "3. Faster guesses get more points",
-                    "4. Each round has a new artist",
-                    "5. Have fun and be creative!",
-                ],
-                self.ui.screen.get_rect(),
-            )
-
+    @override
     def draw(self, surface: pygame.Surface):
         """Draw the entire menu"""
 
@@ -211,6 +196,30 @@ class Menu(Window):
         if self.popup:
             self.popup.draw(surface)
 
+    def _toggle_help(self):
+        if self.popup:
+            self.popup = None
+        else:
+            self.popup = Popup(
+                "How to Play",
+                [
+                    "1. One player draws a word",
+                    "2. Others guess the word",
+                    "3. Faster guesses get more points",
+                    "4. Each round has a new artist",
+                    "5. Have fun and be creative!",
+                ],
+                self.ui.screen.get_rect(),
+                on_close=self._on_popup_close,
+            )
+
+    def _on_popup_close(self):
+        self.popup = None
+
     @debounce(0.5)
     def _update_player_name(self, text: str):
-        self.ui.client.send_action_to_server(PlayerNameAction(text))
+        self.ui.client.send_action_to_server(PlayerNameAction(text), immediate=True)
+
+    def _on_start(self):
+        self.ui.client.send_action_to_server(StartGameAction(), immediate=True)
+        self.ui.show_game()
