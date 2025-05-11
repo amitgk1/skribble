@@ -4,5 +4,5 @@ from shared.actions import Action
 
 
 @dataclass
-class UpdateWordAction(Action):
-    word: str
+class GameOverAction(Action):
+    pass

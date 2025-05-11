@@ -38,28 +38,27 @@ class Popup:
             (self.rect_bound.width, self.rect_bound.height), pygame.SRCALPHA
         )
         overlay.fill((0, 0, 0, 150))
-        surface.blit(overlay, (0, 0))
 
         # Shadow
         shadow_rect = self.popup_rect.copy()
         shadow_rect.x += 5
         shadow_rect.y += 5
-        pygame.draw.rect(surface, DARK_GRAY, shadow_rect, border_radius=15)
+        pygame.draw.rect(overlay, DARK_GRAY, shadow_rect, border_radius=15)
 
         # Main popup
-        pygame.draw.rect(surface, WHITE, self.popup_rect, border_radius=15)
-        pygame.draw.rect(surface, BLACK, self.popup_rect, 2, border_radius=15)
+        pygame.draw.rect(overlay, WHITE, self.popup_rect, border_radius=15)
+        pygame.draw.rect(overlay, BLACK, self.popup_rect, 2, border_radius=15)
 
         # Title
         title_surf = FONT_LG.render(self.title, True, BLACK)
         title_rect = title_surf.get_rect(
             center=(self.popup_rect.centerx, self.popup_rect.top + 40)
         )
-        surface.blit(title_surf, title_rect)
+        overlay.blit(title_surf, title_rect)
 
         # Horizontal line
         pygame.draw.line(
-            surface,
+            overlay,
             DARK_GRAY,
             (self.popup_rect.left + 30, self.popup_rect.top + 80),
             (self.popup_rect.right - 30, self.popup_rect.top + 80),
@@ -72,12 +71,14 @@ class Popup:
             line_rect = line_surf.get_rect(
                 left=self.popup_rect.left + 50, top=self.popup_rect.top + 120 + i * 30
             )
-            surface.blit(line_surf, line_rect)
+            overlay.blit(line_surf, line_rect)
 
         if self.closable:
-            pygame.draw.circle(surface, LIGHT_BLUE, self.close_rect.center, 15)
-            pygame.draw.circle(surface, BLACK, self.close_rect.center, 15, 1)
-            surface.blit(self.close_surf, self.close_rect)
+            pygame.draw.circle(overlay, LIGHT_BLUE, self.close_rect.center, 15)
+            pygame.draw.circle(overlay, BLACK, self.close_rect.center, 15, 1)
+            overlay.blit(self.close_surf, self.close_rect)
+
+        surface.blit(overlay, self.rect_bound)
 
     def handle_event(self, event: pygame.event.Event):
         if self.closable and event.type == pygame.MOUSEBUTTONDOWN:

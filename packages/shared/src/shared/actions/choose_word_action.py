@@ -4,5 +4,5 @@ from shared.actions import Action
 
 
 @dataclass
-class PickWordAction(Action):
+class ChooseWordAction(Action):
     options: list[str]

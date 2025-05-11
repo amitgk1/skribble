@@ -2,6 +2,7 @@ import logging
 
 import pygame
 from shared.actions import Action
+from shared.actions.init_game_state_action import InitGameStateAction
 from shared.actions.player_list_action import PlayerListAction
 from shared.actions.start_game_action import StartGameAction
 
@@ -31,13 +32,16 @@ class UserInterface:
         return self.windows[self.active_window_idx]
 
     def on_action(self, action: Action):
-        if isinstance(action, PlayerListAction):
-            self.state.players_info = action.players_list
+        if isinstance(action, InitGameStateAction):
             self.state.my_player_id = action.you
+            self.state.players_info = action.players_list
+            self.state.chat_messages = action.chat_messages
+            self.state.max_rounds = action.max_rounds
         elif isinstance(action, StartGameAction):
             self.show_game()
-        else:
-            self.active_window.on_action(action)
+        elif isinstance(action, PlayerListAction):
+            self.state.players_info = action.players_list
+        self.active_window.on_action(action)
 
     def show_menu(self):
         self.active_window_idx = 0

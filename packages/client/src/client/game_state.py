@@ -18,6 +18,9 @@ class GameState:
         self.primary_color: pygame.Color = pygame.Color("black")
         self.secondary_color: pygame.Color = pygame.Color("white")
         self.chat_messages: list[ChatMessage] = []
+        self.round = 0
+        self.max_rounds = 0
+        self.winners: list[Player] = None
 
     def get_player_by_id(self, id: UUID):
         return next((p for p in self.players_info if p.id == id), None)
@@ -30,3 +33,6 @@ class GameState:
 
     def active_player(self):
         return next(filter(lambda p: p.is_player_turn, self.players_info), None)
+
+    def am_i_a_winner(self) -> bool:
+        return self.winners and self.me() in self.winners
