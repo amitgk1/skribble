@@ -7,6 +7,7 @@ from shared.player import Player
 
 @dataclass
 class ServerState:
+    is_playing: bool = False
     players: dict[socket.socket, Player] = field(default_factory=dict)
     chat_messages: list[ChatMessage] = field(default_factory=list)
 

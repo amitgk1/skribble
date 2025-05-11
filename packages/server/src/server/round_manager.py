@@ -3,9 +3,9 @@ import threading
 import time
 from itertools import cycle
 from math import floor
+from typing import Callable
 
 from shared.actions.choose_word_action import ChooseWordAction
-from shared.actions.game_over_action import GameOverAction
 from shared.actions.player_list_action import PlayerListAction
 from shared.actions.turn_end_action import TurnEndAction, TurnEndReason
 from shared.actions.turn_start_action import TurnStartAction
@@ -17,8 +17,15 @@ from server.words import WordManager, drawable_words
 
 
 class RoundManager:
-    def __init__(self, state: ServerState, max_rounds: int = 3, turn_timeout: int = 60):
+    def __init__(
+        self,
+        state: ServerState,
+        on_game_over: Callable[[], None],
+        max_rounds: int = 3,
+        turn_timeout: int = 60,
+    ):
         self.state = state
+        self.on_game_over = on_game_over
         self.max_rounds = max_rounds
         self.turn_timeout = turn_timeout
         self.word_manager = WordManager(drawable_words)
@@ -67,8 +74,7 @@ class RoundManager:
 
     def _post_turn_end(self):
         if not next(self.players, None):
-            for s in self.state.players.keys():
-                ActionProtocol.send_batch(s, GameOverAction())
+            self.on_game_over()
 
     def _calculate_score(self):
         """
