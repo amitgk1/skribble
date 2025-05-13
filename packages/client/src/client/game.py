@@ -12,7 +12,7 @@ from shared.actions.turn_end_action import TurnEndAction
 from shared.actions.turn_start_action import TurnStartAction
 from shared.actions.work_picked_action import WordPickedAction
 from shared.chat_message import ChatMessage
-from shared.colors import BLACK, DARK_GRAY, LIGHT_GRAY, WHITE
+from shared.colors import BLACK, DARK_GRAY, LIGHT_GRAY, WHITE, RED
 
 from client.fonts import FONT_LG, FONT_MD, FONT_TITLE
 from client.game_state import GameState
@@ -58,14 +58,15 @@ class WordDisplay:
             )
         elif game_state.current_word:
             word_text = FONT_TITLE.render(game_state.current_word, True, DARK_GRAY)
+            if word_text.get_height() > self.rect.height:
+                word_text = pygame.transform.smoothscale(word_text, (word_text.get_width(), self.rect.height))
+            if word_text.get_width() > self.rect.width:
+                word_text = pygame.transform.smoothscale(word_text, (self.rect.width, word_text.get_height()))
 
         if word_text:
             surface.blit(
                 word_text,
-                (
-                    self.rect.x + (self.rect.width - word_text.get_width()) // 2,
-                    self.rect.y + (self.rect.height - word_text.get_height()) // 2,
-                ),
+                word_text.get_rect(center=self.rect.center)
             )
 
 
@@ -131,7 +132,7 @@ class Timer:
 
     def __init__(self, rect: pygame.Rect):
         self.image = pygame.transform.scale(
-            pygame.image.load("assets/alarm.svg"), rect.inflate(-10, -10).size
+            pygame.image.load("assets/clock.gif"), rect.size
         )
         self.rect = rect
         self.current_time = 0
@@ -149,7 +150,7 @@ class Timer:
             self.current_time -= 1
 
     def draw(self, surface: pygame.Surface):
-        surface.blit(self.image, self.rect.move(5, 5))
+        surface.blit(self.image, self.image.get_rect(center=self.rect.center))
         time_text = FONT_MD.render(str(self.current_time), True, BLACK)
         time_rect = time_text.get_rect(
             center=(self.rect.centerx, self.rect.centery + 5)
@@ -300,7 +301,7 @@ class Game(Window):
             surface, HEADER_COLOR, (0, 0, surface.get_width(), HEADER_HEIGHT)
         )
         Title.draw_title(
-            surface, 125, HEADER_HEIGHT // 2, with_shadow=False, background=HEADER_COLOR
+            surface, 160, HEADER_HEIGHT - FONT_TITLE.get_height() // 2, with_shadow=False, background=HEADER_COLOR
         )
         rounds_title = FONT_LG.render(
             f"Round {self.ui.state.round}/{self.ui.state.max_rounds}", True, BLACK
