@@ -4,8 +4,8 @@ from client.game_state import GameState
 from pygame_emojis import load_emoji
 from shared.colors import BLACK, DARK_BLUE, DARK_GRAY, GOLD, LIGHT_GRAY, WHITE
 
-DRAWING_EMOJI = load_emoji("✏️", FONT_MD.get_height())
-YOU_EMOJI = load_emoji("👤", FONT_MD.get_height())
+DRAWING_EMOJI = load_emoji("✏️", FONT_SM.get_height())
+YOU_EMOJI = load_emoji("👤", FONT_SM.get_height())
 
 
 class PlayersList:
@@ -36,7 +36,7 @@ class PlayersList:
             ):
                 player_rect = pygame.Rect(
                     self.player_list_rect.x + 10,
-                    self.player_list_rect.y + 40 + i * 40,
+                    header_rect.bottom + 10 + i * 40,
                     self.player_list_rect.width - 20,
                     35,
                 )
@@ -69,7 +69,7 @@ class PlayersList:
                 )
 
                 # Player score
-                score_text = FONT_MD.render(f"{player.score} pts", True, DARK_BLUE)
+                score_text = FONT_SM.render(f"{player.score} pts", True, DARK_BLUE)
                 surface.blit(
                     score_text,
                     (

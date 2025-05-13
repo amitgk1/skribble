@@ -12,6 +12,9 @@ dependencies = [
     "shared",
 ]
 
+[project.scripts]
+client-logs = "client:main"
+
 [project.gui-scripts]
 client = "client:main"
 

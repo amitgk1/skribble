@@ -18,3 +18,10 @@ then open the root project folder and run the commends:
 
 then to run the client/server just type:
 uv run [client/server]
+
+## Windows Support
+pygame windows support requires a 3rd party installation of the [GTK-for-Windows-Runtime-Environment-Installer](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases) library
+
+download the .exe file of the latest release & install it. after that close the terminals/IDEs that you used to run this application and re-run it for the PATH environment variable to update and include the new libraries
+
+or you can run in wsl (ubuntu) and it just works :)
