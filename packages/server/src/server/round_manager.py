@@ -5,15 +5,14 @@ from itertools import cycle
 from math import floor
 from typing import Callable
 
+from server.server_state import ServerState
+from server.turn import Turn
+from server.words import WordManager, drawable_words
 from shared.actions.choose_word_action import ChooseWordAction
 from shared.actions.player_list_action import PlayerListAction
 from shared.actions.turn_end_action import TurnEndAction, TurnEndReason
 from shared.actions.turn_start_action import TurnStartAction
 from shared.protocol import ActionProtocol
-
-from server.server_state import ServerState
-from server.turn import Turn
-from server.words import WordManager, drawable_words
 
 
 class RoundManager:
@@ -88,7 +87,6 @@ class RoundManager:
 
     def _on_timeout(self):
         turn_end_action = self.build_turn_end(TurnEndReason.TIMEOUT)
-        print("sending turn end action", turn_end_action)
         for s, p in self.state.players.items():
             ActionProtocol.send_batch(s, turn_end_action)
 

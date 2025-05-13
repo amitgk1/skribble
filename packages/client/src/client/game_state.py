@@ -20,7 +20,7 @@ class GameState:
         self.chat_messages: list[ChatMessage] = []
         self.round = 0
         self.max_rounds = 0
-        self.winners: list[Player] = None
+        self.winners: list[UUID] = None
 
     def get_player_by_id(self, id: UUID):
         return next((p for p in self.players_info if p.id == id), None)
@@ -35,4 +35,4 @@ class GameState:
         return next(filter(lambda p: p.is_player_turn, self.players_info), None)
 
     def am_i_a_winner(self) -> bool:
-        return self.winners and self.me() in self.winners
+        return self.winners and self.my_player_id in self.winners

@@ -6,6 +6,8 @@ from itertools import groupby
 from time import sleep
 from typing import Callable, Mapping
 
+from server.round_manager import RoundManager
+from server.server_state import ServerState
 from shared.actions import Action
 from shared.actions.chat_message_action import ChatMessageAction
 from shared.actions.clear_canvas_action import ClearCanvasAction
@@ -22,9 +24,6 @@ from shared.colors import GREEN
 from shared.constants import SYSTEM_PLAYER_ID
 from shared.player import Player
 from shared.protocol import ActionProtocol
-
-from server.round_manager import RoundManager
-from server.server_state import ServerState
 
 type OnActionCallable = Callable[[list[Action], socket.socket], None]
 
@@ -107,8 +106,13 @@ class Room:
             ActionProtocol.send_batch(p_sock, actions_to_send)
 
     def _on_game_over(self):
+        # dealing with multiple winners using groupby
+        score, winners = next(
+            groupby(self.state.players.values(), key=lambda p: p.score)
+        )
+        game_over_action = GameOverAction(score=score, winners=[p.id for p in winners])
         for s in self.state.players.keys():
-            ActionProtocol.send_batch(s, GameOverAction())
+            ActionProtocol.send_batch(s, game_over_action)
             sleep(2)
             s.close()
         self._init_room()
@@ -155,7 +159,6 @@ class Room:
                     if action_type in self.actionsMap:
                         self.actionsMap[action_type](action_list, sock)
                     else:
-                        print(action_list)
                         logging.warning("Unknown action type %s", action_type)
         except socket.error:
             logging.exception("Error handling client %s", addr)

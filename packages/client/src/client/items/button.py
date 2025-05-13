@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, Tuple, override
 
 import pygame
@@ -81,7 +82,7 @@ class Button(BaseButton):
                     self.image, (width - 10, height - 10)
                 )
             except pygame.error:
-                print(f"Unable to load image {image_path}")
+                logging.exception("Unable to load image %s", image_path)
 
     @override
     def draw(self, surface: pygame.Surface):

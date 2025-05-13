@@ -1,19 +1,6 @@
-from itertools import groupby
 from typing import TYPE_CHECKING, Callable, override
 
 import pygame
-from shared.actions import Action
-from shared.actions.chat_message_action import ChatMessageAction
-from shared.actions.choose_word_action import ChooseWordAction
-from shared.actions.clear_canvas_action import ClearCanvasAction
-from shared.actions.draw_action import DrawAction
-from shared.actions.game_over_action import GameOverAction
-from shared.actions.turn_end_action import TurnEndAction
-from shared.actions.turn_start_action import TurnStartAction
-from shared.actions.work_picked_action import WordPickedAction
-from shared.chat_message import ChatMessage
-from shared.colors import BLACK, DARK_GRAY, LIGHT_GRAY, WHITE, RED
-
 from client.fonts import FONT_LG, FONT_MD, FONT_TITLE
 from client.game_state import GameState
 from client.items.bubble import Bubble
@@ -24,6 +11,17 @@ from client.items.popup import Popup
 from client.items.title import Title
 from client.items.toolbar import Toolbar
 from client.window import Window
+from shared.actions import Action
+from shared.actions.chat_message_action import ChatMessageAction
+from shared.actions.choose_word_action import ChooseWordAction
+from shared.actions.clear_canvas_action import ClearCanvasAction
+from shared.actions.draw_action import DrawAction
+from shared.actions.game_over_action import GameOverAction
+from shared.actions.turn_end_action import TurnEndAction
+from shared.actions.turn_start_action import TurnStartAction
+from shared.actions.work_picked_action import WordPickedAction
+from shared.chat_message import ChatMessage
+from shared.colors import BLACK, DARK_GRAY, LIGHT_GRAY, WHITE
 
 if TYPE_CHECKING:
     from client import UserInterface
@@ -272,20 +270,16 @@ class Game(Window):
             for p in self.ui.state.players_info:
                 p.is_player_turn = False
 
-            # dealing with multiple winners using groupby
-            score, players = next(
-                groupby(self.ui.state.players_info, key=lambda p: p.score)
-            )
-            self.ui.state.winners = list(players)
+            self.ui.state.winners = action.winners
             self.popup = Popup(
                 "Game Over!",
                 [
                     "And the winner(s) are:",
                     *[
-                        p.get_player_name(self.ui.state.my_player_id)
-                        for p in self.ui.state.winners
+                        self.ui.state.get_player_by_id(id).get_player_name(id)
+                        for id in self.ui.state.winners
                     ],
-                    f"with {score} points!",
+                    f"with {action.score} points!",
                 ],
                 self.canvas.surface.get_rect(topleft=(self.canvas.x, self.canvas.y)),
                 closable=False,
