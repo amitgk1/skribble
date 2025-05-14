@@ -1,16 +1,6 @@
 from typing import TYPE_CHECKING, Callable, override
 
 import pygame
-from client.fonts import FONT_LG, FONT_MD, FONT_TITLE
-from client.game_state import GameState
-from client.items.bubble import Bubble
-from client.items.button import Button
-from client.items.chat import Chat
-from client.items.players_list import PlayersList
-from client.items.popup import Popup
-from client.items.title import Title
-from client.items.toolbar import Toolbar
-from client.window import Window
 from shared.actions import Action
 from shared.actions.chat_message_action import ChatMessageAction
 from shared.actions.choose_word_action import ChooseWordAction
@@ -22,6 +12,17 @@ from shared.actions.turn_start_action import TurnStartAction
 from shared.actions.work_picked_action import WordPickedAction
 from shared.chat_message import ChatMessage
 from shared.colors import BLACK, DARK_GRAY, LIGHT_GRAY, WHITE
+
+from client.fonts import FONT_LG, FONT_MD, FONT_TITLE
+from client.game_state import GameState
+from client.items.bubble import Bubble
+from client.items.button import Button
+from client.items.chat import Chat
+from client.items.players_list import PlayersList
+from client.items.popup import Popup
+from client.items.title import Title
+from client.items.toolbar import Toolbar
+from client.window import Window
 
 if TYPE_CHECKING:
     from client import UserInterface
@@ -38,9 +39,15 @@ HEADER_HEIGHT = 80
 
 class WordDisplay:
     def __init__(self, rect: pygame.Rect):
+        """
+        Initializes an object with a given rectangle (Pygame Rect)
+        """
         self.rect = rect
 
     def draw(self, game_state: GameState, surface: pygame.Surface):
+        """
+        Draws a rectangle and displays the current word or a message about the active player picking a word
+        """
         pygame.draw.rect(surface, WHITE, self.rect, border_radius=10)
 
         word_text = None
@@ -57,15 +64,16 @@ class WordDisplay:
         elif game_state.current_word:
             word_text = FONT_TITLE.render(game_state.current_word, True, DARK_GRAY)
             if word_text.get_height() > self.rect.height:
-                word_text = pygame.transform.smoothscale(word_text, (word_text.get_width(), self.rect.height))
+                word_text = pygame.transform.smoothscale(
+                    word_text, (word_text.get_width(), self.rect.height)
+                )
             if word_text.get_width() > self.rect.width:
-                word_text = pygame.transform.smoothscale(word_text, (self.rect.width, word_text.get_height()))
+                word_text = pygame.transform.smoothscale(
+                    word_text, (self.rect.width, word_text.get_height())
+                )
 
         if word_text:
-            surface.blit(
-                word_text,
-                word_text.get_rect(center=self.rect.center)
-            )
+            surface.blit(word_text, word_text.get_rect(center=self.rect.center))
 
 
 class PickWordPopUp:
@@ -75,11 +83,17 @@ class PickWordPopUp:
         word_options: list[str],
         on_pick_word: Callable[[str], None],
     ):
+        """
+        Initializes a word selection interface with a boundary, word options, and a callback for word picking.
+        """
         self.rect_bound = rect_bound
         self.on_pick_word = on_pick_word
         self.buttons = self._generate_word_options_buttons(word_options)
 
     def draw(self, surface: pygame.Surface):
+        """
+        Draws an overlay with a title and word option buttons within a specified rectangle
+        """
         overlay = pygame.Surface(
             (self.rect_bound.width, self.rect_bound.height), pygame.SRCALPHA
         )
@@ -99,10 +113,16 @@ class PickWordPopUp:
             btn.draw(surface)
 
     def handle_event(self, event):
+        """
+        Handles events for all the word option buttons
+        """
         for btn in self.buttons:
             btn.handle_event(event)
 
     def _generate_word_options_buttons(self, word_options):
+        """
+        Generates buttons for each word option with defined positioning and click handlers
+        """
         width = 100
         spacing = 50
         height = 50
@@ -129,6 +149,9 @@ class Timer:
     TIMER_EVENT = pygame.event.custom_type()
 
     def __init__(self, rect: pygame.Rect):
+        """
+        Initializes an object with an image (scaled to fit the given rectangle) and tracks the current time
+        """
         self.image = pygame.transform.scale(
             pygame.image.load("assets/clock.gif"), rect.size
         )
@@ -136,18 +159,30 @@ class Timer:
         self.current_time = 0
 
     def start_timer(self, timeout: int):
+        """
+        Starts a timer with a specified timeout, triggering a timer event every second
+        """
         self.current_time = timeout
         pygame.time.set_timer(Timer.TIMER_EVENT, 1000, timeout)
 
     def stop_timer(self):
+        """
+        Stops the timer and resets the current time to zero.
+        """
         pygame.time.set_timer(Timer.TIMER_EVENT, 0)
         self.current_time = 0
 
     def handle_event(self, event: pygame.event.Event):
+        """
+        Decreases the timer by one second when a timer event occurs.
+        """
         if event.type == Timer.TIMER_EVENT:
             self.current_time -= 1
 
     def draw(self, surface: pygame.Surface):
+        """
+        Draws the timer icon and current countdown value on the screen
+        """
         surface.blit(self.image, self.image.get_rect(center=self.rect.center))
         time_text = FONT_MD.render(str(self.current_time), True, BLACK)
         time_rect = time_text.get_rect(
@@ -213,6 +248,9 @@ class Game(Window):
 
     @override
     def handle_event(self, event):
+        """
+        Handles events for the popup (if shown), otherwise delegates to timer, canvas, toolbar, and chat
+        """
         if self.popup:
             self.popup.handle_event(event)
         else:
@@ -224,6 +262,9 @@ class Game(Window):
 
     @override
     def update(self):
+        """
+        Updates canvas, toolbar, and chat if drawing is allowed, and updates bubbles if the player is a winner
+        """
         if self.ui.state.ready_to_draw():
             self.canvas.update()
             self.toolbar.update()
@@ -234,6 +275,9 @@ class Game(Window):
 
     @override
     def on_action(self, action: Action):
+        """
+        Handles different game actions by updating state, managing popups, timer, canvas, and chat messages accordingly
+        """
         if isinstance(action, DrawAction):
             self.ui.state.pending_draw_lines.put(action)
         elif isinstance(action, ClearCanvasAction):
@@ -290,12 +334,19 @@ class Game(Window):
 
     @override
     def draw(self, surface):
+        """
+        Draws the full game UI including header, canvas, toolbar, chat, players, timer, popups, and winner effects
+        """
         # Header
         pygame.draw.rect(
             surface, HEADER_COLOR, (0, 0, surface.get_width(), HEADER_HEIGHT)
         )
         Title.draw_title(
-            surface, 160, HEADER_HEIGHT - FONT_TITLE.get_height() // 2, with_shadow=False, background=HEADER_COLOR
+            surface,
+            160,
+            HEADER_HEIGHT - FONT_TITLE.get_height() // 2,
+            with_shadow=False,
+            background=HEADER_COLOR,
         )
         rounds_title = FONT_LG.render(
             f"Round {self.ui.state.round}/{self.ui.state.max_rounds}", True, BLACK
@@ -328,22 +379,37 @@ class Game(Window):
                 bubble.draw(surface)
 
     def _on_draw(self, draw_action: DrawAction):
+        """
+        Processes a draw action locally and sends it to the server
+        """
         self.on_action(draw_action)
         self.ui.client.send_action_to_server(draw_action)
 
     def _on_clear(self):
+        """
+        Clears the canvas and immediately sends a clear action to the server
+        """
         self.canvas.clear_canvas()
         self.ui.client.send_action_to_server(ClearCanvasAction(), immediate=True)
 
     def _on_pick_word(self, word: str):
+        """
+        Sends the picked word to the server and closes the popup
+        """
         self.ui.client.send_action_to_server(WordPickedAction(word), immediate=True)
         self.popup = None
 
     def _on_chat_enter(self, text: str):
+        """
+        Sends a chat message to the server when entered
+        """
         message = ChatMessage(self.ui.state.me().name, text, BLACK)
         self.ui.client.send_action_to_server(ChatMessageAction(message), immediate=True)
 
     def _draw_smooth_line(self, surf: pygame.surface, draw_action: DrawAction):
+        """
+        Draws a smooth line by interpolating points between the start and end, drawing circles at each point
+        """
         distance = int(draw_action.start.distance_to(draw_action.end))
 
         if distance == 0:

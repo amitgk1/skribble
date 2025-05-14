@@ -12,3 +12,6 @@ GRAY = (200, 200, 200)
 DARK_GRAY = (100, 100, 100)
 LIGHT_GRAY = (230, 230, 230)
 GOLD = (255, 215, 0)
+
+# all the colors used throughout the project. its used of the canvas, the fonts, elements and even in the chat
+# it's in shared because the server should have access to the colors for the chat messages

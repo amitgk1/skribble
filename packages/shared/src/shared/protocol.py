@@ -10,6 +10,9 @@ HEADER_SIZE = 4
 class ActionProtocol:
     @staticmethod
     def send_batch(sock: socket.socket, batch: list[Action] | Action):
+        """
+        sends the batch form server to client and the opposite
+        """
         if not batch:
             return
 
@@ -23,6 +26,9 @@ class ActionProtocol:
 
     @staticmethod
     def recv_batch_raw(sock: socket.socket):
+        """
+        receive the batch from the client to the server and the opposite
+        """
         # First read the message length header
         header = sock.recv(HEADER_SIZE)
         if not header or len(header) < HEADER_SIZE:
@@ -43,6 +49,9 @@ class ActionProtocol:
 
     @staticmethod
     def recv_batch(sock: socket.socket) -> list[Action]:
+        """
+        This function receives raw data from a socket, attempts to unpickle it into a list of Action objects, and returns the list if successful.
+        """
         size_plus_data = ActionProtocol.recv_batch_raw(sock)
 
         try:

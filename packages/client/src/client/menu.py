@@ -21,6 +21,9 @@ if TYPE_CHECKING:
 
 class Menu(Window):
     def __init__(self, ui: "UserInterface"):
+        """
+        Initializes the user interface with decorative bubbles, a start button, a "How to Play" button, and an "Exit" button, all positioned on the screen
+        """
         self.ui = ui
 
         # Create decorative bubbles
@@ -139,6 +142,7 @@ class Menu(Window):
         if abs(self.logo_y_offset) > 10:
             self.logo_direction *= -1
 
+        # updates the state of the start button, disabling it if there are fewer than 2 players or the current player is not the owner
         self.start_button.disabled = (
             len(self.ui.state.players_info) < 2 or not self.ui.state.me().is_owner
         )
@@ -193,6 +197,11 @@ class Menu(Window):
             self.popup.draw(surface)
 
     def _toggle_help(self):
+        """
+        method toggles the help popup on and off.
+        If the popup is currently active, it closes it;
+        if it's not active, it creates a new Popup object with instructions on how to play the game
+        """
         if self.popup:
             self.popup = None
         else:
@@ -214,8 +223,17 @@ class Menu(Window):
 
     @debounce(0.5)
     def _update_player_name(self, text: str):
+        """
+        Sends the player's updated name to the server using ClientSocket
+        this function is debounced, meaning it will be called once there are no more calls to this function
+        after 0.5sec
+        this is used to only send the last keyboard input from the user when he types fast
+        """
         self.ui.client.send_action_to_server(PlayerNameAction(text), immediate=True)
 
     def _on_start(self):
+        """
+        Sends a StartGameAction to the server to start the game and switches the UI to the game screen
+        """
         self.ui.client.send_action_to_server(StartGameAction(), immediate=True)
         self.ui.show_game()

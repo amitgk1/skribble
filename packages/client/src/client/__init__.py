@@ -18,20 +18,29 @@ BACKGROUND_COLOR = (240, 240, 255)
 
 class UserInterface:
     def __init__(self):
+        """
+        Initializes Pygame, game state, UI windows, and the network client
+        """
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Skribbl.io Clone by Noam Genish")
         self.clock = pygame.time.Clock()
         self.state = GameState()
-        self.windows: tuple[Window] = [Menu(self), Game(self)]
+        self.windows: tuple[Window] = (Menu(self), Game(self))
         self.active_window_idx = 0
         self.client = ClientSocket(on_action=self.on_action)
 
     @property
     def active_window(self):
+        """
+        Returns the currently active UI window.
+        """
         return self.windows[self.active_window_idx]
 
     def on_action(self, action: Action):
+        """
+        Handles incoming actions by updating game state or UI based on their type
+        """
         if isinstance(action, InitGameStateAction):
             self.state.my_player_id = action.you
             self.state.players_info = action.players_list
@@ -44,16 +53,28 @@ class UserInterface:
         self.active_window.on_action(action)
 
     def show_menu(self):
+        """
+        Sets the active window to the menu
+        """
         self.active_window_idx = 0
 
     def show_game(self):
+        """
+        Sets the active window to the game.
+        """
         self.active_window_idx = 1
 
     def quit_game(self):
+        """
+        Stops the game and closes the client connection
+        """
         self.state.running = False
         self.client.close_client()
 
     def run(self):
+        """
+        Runs the game loop, handling events, updating, and drawing the active window at 60 FPS
+        """
         while self.state.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -76,6 +97,9 @@ class UserInterface:
 
 
 def main():
+    """
+    Starts the user interface, handling any unexpected errors, and ensures Pygame quits afterward
+    """
     ui = UserInterface()
     try:
         ui.run()

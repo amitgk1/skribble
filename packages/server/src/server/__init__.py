@@ -9,6 +9,9 @@ global_room = Room()
 
 
 def main():
+    """
+    Initializes a TCP server, binds it to a specified host and port, listens for client connections, and accepts incoming clients, adding them to the global room
+    """
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host = "0.0.0.0"
     port = SERVER_PORT

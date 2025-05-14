@@ -7,6 +7,10 @@ from shared.actions.draw_action import DrawAction
 
 @dataclass
 class Turn:
+    """
+    Represents a single turn in the game, with a timer for timeouts, a word to be guessed, the active player, drawing actions, player score updates, and a timestamp for when the turn started. It manages the state and progress of the game during each turn
+    """
+
     timer: threading.Timer
     word: str = None
     active_player: socket.socket = None
